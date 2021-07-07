@@ -1,72 +1,34 @@
 #include "Arduino.h"
 #include "timeUtils.h"
 #include "ledBlinker.h"
-
-/* Data structures */
-
-typedef struct {
-	unsigned int currentDutyCycleIndex;
-	unsigned int currentDutyCycle;
-	unsigned int currentState;
-	unsigned long lastBlinkTime;
-} ledBlinkerData;
-
+#include "ledInterface.h"
 
 /* Constants */
 #define N_DUTY_CYCLES 4
 static const int dutyCycles[] = {64, 128, 192, 255};
 
 /* Internal variables */
-static ledBlinkerData led;
-
-/* Internal function prototypes */
-static void toggleLedState(void);
-static void turnLedOn(void);
-static void turnLedOff(void);
+static unsigned int currentDutyCycleIndex = 0;
+static unsigned long lastBlinkTime = 0;
 
 
 void ledBlinkerInit(void){
-	pinMode(LED_BLINKER_PIN, OUTPUT);
-	led.currentState = LOW;
-	led.currentDutyCycleIndex = 0;
-	led.currentDutyCycle = dutyCycles[0];
-	turnLedOff();
+	ledInit(LED_BLINKER_PIN);
+	ledSetIntensity(LED_BLINKER_PIN, dutyCycles[currentDutyCycleIndex]);
+	lastBlinkTime = 0;
 }
 
 unsigned long ledBlinkerIterate(void){
-	if (millisecondsElapsedSince(led.lastBlinkTime) >= LED_BLINKER_PERIOD_MS) {
-		led.lastBlinkTime = millis();
-		toggleLedState();
+	if (millisecondsElapsedSince(lastBlinkTime) >= LED_BLINKER_PERIOD_MS) {
+		lastBlinkTime = getMilliseconds();
+		ledToggle(LED_BLINKER_PIN);
 	}
-	return led.currentState;
+	return ledGetState(LED_BLINKER_PIN);
 }
 
 void ledBlinkerIntensityCycle(void){
-	if (++led.currentDutyCycleIndex >= N_DUTY_CYCLES) { // do circular iteration
-		led.currentDutyCycleIndex = 0;
+	if (++currentDutyCycleIndex >= N_DUTY_CYCLES) { // do circular iteration
+		currentDutyCycleIndex = 0;
 	}
-	led.currentDutyCycle = dutyCycles[led.currentDutyCycleIndex];
-	if (led.currentState == HIGH) {
-		turnLedOn(); // Force PWM update
-	}
-}
-
-static void toggleLedState(void) {
-	if (led.currentState == HIGH) {
-		led.currentState = LOW;
-		turnLedOff();
-	}
-	else {
-		led.currentState = HIGH;
-		turnLedOn();
-	}
-}
-
-static void turnLedOn(void){
-	analogWrite(LED_BLINKER_PIN, led.currentDutyCycle);
-}
-
-static void turnLedOff(void){
-	//analogWrite(LED_BLINKER_PIN, 5);
-	digitalWrite(LED_BLINKER_PIN, LOW);
+	ledSetIntensity(LED_BLINKER_PIN, dutyCycles[currentDutyCycleIndex]);
 }
