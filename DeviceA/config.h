@@ -22,7 +22,7 @@
 /* led blinker configuration */
 
 #define LED_BLINKER_PIN 13   // L1
-#define LED_BLINKER_PERIOD_MS 500
+#define LED_BLINKER_PERIOD_MS 1000
 
 /* serial led controller configuration */
 

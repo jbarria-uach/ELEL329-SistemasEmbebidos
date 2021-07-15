@@ -1,19 +1,31 @@
+#include <Arduino.h>
+#include <limits.h>
+#include <avr/sleep.h>
 #include "pinDebouncer.h"
 #include "timeUtils.h"
 #include "ledBlinker.h"
 #include "serialLedController.h"
+#include "ledInterface.h"
 #include "config.h"
 
-
 typedef struct {
-  int PAState;
-  int PBState;
-  int PCState;
-  int PDState;
+  volatile int PAState;
+  volatile int PBState;
+  volatile int PCState;
+  volatile int PDState;
+  volatile int PAPushed;
+  volatile int PBPushed;
+  volatile int PCPushed;
+  volatile int PDPushed;
 } PushButtonsState;
 
 static int pinsToDebounce[] = {PA, PB, PC, PD}; // Pins to debounce
-static PushButtonsState buttons;
+static unsigned long timeToSleep = ULONG_MAX;
+static volatile PushButtonsState buttons;
+static volatile unsigned long lastInterruptTime = 0;
+
+static void goToSleep();
+static void wakeUpRoutine();
 
 void setup() {
   // Push Buttons are passive, use internal pullups on these inputs
@@ -49,9 +61,28 @@ void loop() {
   // Check if there's something in serial port
   while (Serial.available() > 0) {
     // Input for the Serial LEDs controller to parse.
-    noInterrupts();
     serialLedParseChar((char) Serial.read());
-    interrupts();
+  }
+  // Check button events asynchronously.
+  if (buttons.PAPushed) {
+    buttons.PAPushed = 0;
+    onPushButtonA();
+  }
+  if (buttons.PBPushed) {
+    buttons.PBPushed = 0;
+    onPushButtonB();
+  }
+  if (buttons.PCPushed) {
+    buttons.PCPushed = 0;
+    onPushButtonC();
+  }
+  if (buttons.PDPushed) {
+    buttons.PDPushed = 0;
+    onPushButtonD();
+  }
+  if (millis() >= timeToSleep) { // Sleep asynchronously
+    goToSleep();
+    wakeUpRoutine();
   }
 }
 
@@ -69,27 +100,54 @@ void onPushButtonC() {
 }
 
 void onPushButtonD() {
-  // Not implemented yet...
+  timeToSleep = millis() + PIN_DEBOUNCE_TIME_MS;
 }
 
 void onExternalInterrupt() {
-  noInterrupts();
   pinDebouncerUpdate();
   if ((buttons.PAState == HIGH) && (pinDebouncerGetPinState(PA) == LOW)) {
-    onPushButtonA();
+    buttons.PAPushed++;
   }
   if ((buttons.PBState == HIGH) && (pinDebouncerGetPinState(PB) == LOW)) {
-    onPushButtonB();
+    buttons.PBPushed++;
   }
   if ((buttons.PCState == HIGH) && (pinDebouncerGetPinState(PC) == LOW)) {
-    onPushButtonC();
+    buttons.PCPushed++;
   }
   if ((buttons.PDState == HIGH) && (pinDebouncerGetPinState(PD) == LOW)) {
-    onPushButtonD();
+    buttons.PDPushed++;
   }
   buttons.PAState = pinDebouncerGetPinState(PA);
   buttons.PBState = pinDebouncerGetPinState(PB);
   buttons.PCState = pinDebouncerGetPinState(PC);
   buttons.PDState = pinDebouncerGetPinState(PD);
-  interrupts();
+}
+
+void wakeUpOnExternalInterrupt() {
+
+}
+
+static void goToSleep(){
+  // Turn OFF all the LEDs
+  ledTurnOff(LED_BLINKER_PIN);
+  ledTurnOff(SERIAL_LED_PIN_1);
+  ledTurnOff(SERIAL_LED_PIN_2);
+  ledTurnOff(SERIAL_LED_PIN_3);
+  // Change ISR
+  detachInterrupt(digitalPinToInterrupt(EXT_INT_PIN));
+  delay(100);
+  attachInterrupt(digitalPinToInterrupt(EXT_INT_PIN), 
+                  wakeUpOnExternalInterrupt, LOW);
+  delay(100);
+  // Put the processor to sleep
+  sleep_enable();
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_cpu();
+}
+
+static void wakeUpRoutine(){
+  detachInterrupt(digitalPinToInterrupt(EXT_INT_PIN));
+  attachInterrupt(digitalPinToInterrupt(EXT_INT_PIN), 
+                  onExternalInterrupt, FALLING);
+  timeToSleep = ULONG_MAX;
 }
