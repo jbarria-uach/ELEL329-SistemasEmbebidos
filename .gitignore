@@ -1,1 +1,3 @@
 DeviceA/.vscode
+DeviceB/venv/
+*.egg-info
