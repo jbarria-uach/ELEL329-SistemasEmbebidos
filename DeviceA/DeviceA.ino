@@ -82,29 +82,36 @@ void loop() {
   }
   if (millis() >= timeToSleep) { // Sleep asynchronously
     goToSleep();
+    // Sleeping...
     wakeUpRoutine();
   }
 }
 
+/* Button Callbacks */ 
+
 void onPushButtonA() {
+  requestLEDsStateOFF();
   ledBlinkerIntensityCycle();
 }
 
 void onPushButtonB() {
-    Serial.print("ELEL329-PRINT:Milliseconds elapsed on device A:");
-    Serial.println(millis());
+  requestLEDsStateOFF();
+  Serial.print("ELEL329-PRINT:Milliseconds elapsed on device A:");
+  Serial.println(millis());
 }
 
 void onPushButtonC() {
-  Serial.println("ELEL329-REQLEDS");
+  requestLEDsStateON();
 }
 
 void onPushButtonD() {
+  requestLEDsStateOFF();
   timeToSleep = millis() + PIN_DEBOUNCE_TIME_MS;
 }
 
+/* Interrupt Service Routines */
+
 void onExternalInterrupt() {
-  pinDebouncerUpdate();
   if ((buttons.PAState == HIGH) && (pinDebouncerGetPinState(PA) == LOW)) {
     buttons.PAPushed++;
   }
@@ -126,6 +133,8 @@ void onExternalInterrupt() {
 void wakeUpOnExternalInterrupt() {
 
 }
+
+/* Internal helper functions */
 
 static void goToSleep(){
   // Turn OFF all the LEDs
@@ -150,4 +159,12 @@ static void wakeUpRoutine(){
   attachInterrupt(digitalPinToInterrupt(EXT_INT_PIN), 
                   onExternalInterrupt, FALLING);
   timeToSleep = ULONG_MAX;
+}
+
+static void requestLEDsStateON(void) {
+  Serial.println("ELEL329-REQLEDS-ON");
+}
+
+static void requestLEDsStateOFF(void) {
+  Serial.println("ELEL329-REQLEDS-OFF");
 }
