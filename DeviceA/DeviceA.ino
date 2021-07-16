@@ -96,7 +96,7 @@ void onPushButtonA() {
 
 void onPushButtonB() {
   requestLEDsStateOFF();
-  Serial.print("ELEL329-PRINT:Milliseconds elapsed on device A:");
+  Serial.print("ELEL329-PRINT-Milliseconds elapsed on device A:");
   Serial.println(millis());
 }
 
