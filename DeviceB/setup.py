@@ -9,6 +9,6 @@ setup(
     author='Jorge Barría',
     author_email='jebarria@alumnos.uach.cl',
     description='ELEL329 Embedded Systems - Device B',
-    install_requires=['click'],
+    install_requires=['click', 'pyserial'],
     entry_points={'console_scripts': ["dev_b = device_b:main"]}
 )
