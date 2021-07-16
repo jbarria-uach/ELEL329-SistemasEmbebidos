@@ -1,3 +1,16 @@
+/**
+ * @file pinDebouncer.c
+ * @author Jorge Barría (jebarria@alumnos.uach.cl)
+ * @brief Input pin debouncer module header.
+ * @version 0.1
+ * @date 2021-07-07
+ * 
+ * @copyright Copyright (c) 2021 by Universidad Austral de Chile
+ * 
+ * This module exists to face the push button "bounce effect" without using
+ * the delay() function.
+ * 
+ */
 #include <limits.h>
 #include "Arduino.h"
 #include "pinDebouncer.h"
@@ -22,6 +35,7 @@ static pinDebouncerState state;
 /* Internal function prototypes */
 static debouncedPin* getDebouncedPin(int pinNumber);
 
+// Function description in header.
 void pinDebouncerInit(int nPins, int *pinNumbers){
 	int i;
 	state.nPins = nPins;
@@ -35,6 +49,7 @@ void pinDebouncerInit(int nPins, int *pinNumbers){
 	}
 }
 
+// Function description in header.
 void pinDebouncerUpdate(){
 	int i, newState;
 	debouncedPin* pin;
@@ -50,16 +65,18 @@ void pinDebouncerUpdate(){
 	}
 }
 
+// Function description in header.
 int pinDebouncerGetPinState(int pinNumber){
 	debouncedPin* pin = getDebouncedPin(pinNumber);
 	return pin != NULL ? pin->state : -1;
 }
 
-unsigned long pinDebouncerGetPinLastChangeTime(int pinNumber){
-	debouncedPin* pin = getDebouncedPin(pinNumber);
-	return pin != NULL ? pin->lastTimeChanged : ULONG_MAX;
-}
-
+/**
+ * @brief Gets the pin debouncedPin structure.
+ * 
+ * @param pinNumber the pin number.
+ * @return a pointer to the corresponding debouncedPin structure instance.
+ */
 static debouncedPin* getDebouncedPin(int pinNumber){
 	int pinIndex = 0;
 	while (state.input[pinIndex].pinNumber != pinNumber) {
