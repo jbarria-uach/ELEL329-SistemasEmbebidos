@@ -1,7 +1,16 @@
+/**
+ * @file config.h
+ * @author Jorge Barría (jebarria@alumnos.uach.cl)
+ * @brief Configuration macros header.
+ * @version 0.1
+ * @date 2021-07-07
+ * 
+ * @copyright Copyright (c) 2021 by Universidad Austral de Chile
+ * 
+ */
+
 #ifndef CONFIG_H
 #define CONFIG_H
-
-#define SLEEP_MODE_PIN 12
 
 /* Pushbuttons */
 #define EXT_INT_PIN 3
@@ -30,4 +39,4 @@
 #define SERIAL_LED_PIN_2 11  // L3
 #define SERIAL_LED_PIN_3 10  // L4
 
-#endif
+#endif /* CONFIG_H */
