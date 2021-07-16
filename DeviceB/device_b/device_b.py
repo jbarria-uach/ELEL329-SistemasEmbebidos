@@ -1,10 +1,11 @@
 import random
 import time
 
+import click as click
 import serial
 import serial.threaded
 
-from DeviceB.device_b import DeviceBSerialProtocol
+from device_b import DeviceBSerialProtocol
 
 DEFAULT_SERIAL_PORT = '/dev/ttyACM0'
 DEFAULT_BAUDRATE = 115200
@@ -16,12 +17,18 @@ def generate_leds_state_text() -> str:
         (random.choice(('H', 'L')) for _ in range(3))) + '\n'
 
 
-def main(serial_port_name=DEFAULT_SERIAL_PORT, baudrate=DEFAULT_BAUDRATE,
-         leds_state_interval_ms=DEFAULT_LEDS_STATE_INTERVAL_MS):
+@click.command()
+@click.option('-p', '--port', default=DEFAULT_SERIAL_PORT,
+              help="Serial port to connect to.")
+@click.option('-b', '--baudrate', default=DEFAULT_BAUDRATE,
+              help="Serial port baud rate.")
+@click.option('-i', '--interval', default=DEFAULT_LEDS_STATE_INTERVAL_MS,
+              help="Interval in milliseconds of LEDs state transmission.")
+def main(port, baudrate, interval):
     serial_port = None
-    leds_state_interval = float(leds_state_interval_ms) / 1000.0  # secs
+    leds_state_interval = float(interval) / 1000.0  # secs
     try:
-        serial_port = serial.Serial(serial_port_name, baudrate=baudrate)
+        serial_port = serial.Serial(port, baudrate=baudrate)
         with serial.threaded.ReaderThread(
                 serial_port, DeviceBSerialProtocol) as serial_protocol:
             assert isinstance(serial_protocol, DeviceBSerialProtocol)
@@ -29,7 +36,6 @@ def main(serial_port_name=DEFAULT_SERIAL_PORT, baudrate=DEFAULT_BAUDRATE,
                 serial_protocol.wait()
                 if serial_protocol.should_send_leds_state():
                     leds_state = generate_leds_state_text()
-                    # print(f"Sending: {leds_state.rstrip()}")
                     serial_protocol.write_line(leds_state)
                     time.sleep(leds_state_interval)
     except (SystemExit, KeyboardInterrupt):

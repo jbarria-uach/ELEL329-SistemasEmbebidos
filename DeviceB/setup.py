@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='device-b',
-    version='0.1',
+    version='0.2',
     packages=['device_b'],
     url='',
     license='MIT',
