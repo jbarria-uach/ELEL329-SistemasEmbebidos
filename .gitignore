@@ -1,3 +1,4 @@
-DeviceA/.vscode
-DeviceB/venv/
+**/.vscode
+**/venv/
+**/.idea
 *.egg-info
