@@ -20,7 +20,6 @@ class DeviceBSerialProtocol(serial.threaded.LineReader):
         super().connection_lost(exc)
 
     def handle_line(self, line: str):
-        # print(f"Received: {line}")
         if line.startswith('ELEL329'):
             try:
                 _, cmd, arg = line.split('-', maxsplit=2)
@@ -44,10 +43,12 @@ class DeviceBSerialProtocol(serial.threaded.LineReader):
             if not self.__reqleds_on:
                 self.__reqleds_on = True
                 self.__notifier.set()
+                print("Device A requested to start LEDs state transmission")
         elif arg == 'OFF':
             if self.__reqleds_on:
                 self.__reqleds_on = False
                 self.__notifier.clear()
+                print("Device A requested to stop LEDs state transmission")
         else:
             pass  # ignore invalid command
 

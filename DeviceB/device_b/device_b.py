@@ -6,14 +6,20 @@ import serial.threaded
 
 from DeviceB.device_b import DeviceBSerialProtocol
 
+DEFAULT_SERIAL_PORT = '/dev/ttyACM0'
+DEFAULT_BAUDRATE = 115200
+DEFAULT_LEDS_STATE_INTERVAL_MS = 250
+
 
 def generate_leds_state_text() -> str:
     return 'ELEL329-LEDS:' + ''.join(
         (random.choice(('H', 'L')) for _ in range(3))) + '\n'
 
 
-def main(serial_port_name='/dev/ttyACM0', baudrate=115200):
+def main(serial_port_name=DEFAULT_SERIAL_PORT, baudrate=DEFAULT_BAUDRATE,
+         leds_state_interval_ms=DEFAULT_LEDS_STATE_INTERVAL_MS):
     serial_port = None
+    leds_state_interval = float(leds_state_interval_ms) / 1000.0  # secs
     try:
         serial_port = serial.Serial(serial_port_name, baudrate=baudrate)
         with serial.threaded.ReaderThread(
@@ -25,7 +31,7 @@ def main(serial_port_name='/dev/ttyACM0', baudrate=115200):
                     leds_state = generate_leds_state_text()
                     # print(f"Sending: {leds_state.rstrip()}")
                     serial_protocol.write_line(leds_state)
-                    time.sleep(0.25)
+                    time.sleep(leds_state_interval)
     except (SystemExit, KeyboardInterrupt):
         print("Closing...")
         if isinstance(serial_port, serial.Serial) and serial_port.is_open:
@@ -35,4 +41,4 @@ def main(serial_port_name='/dev/ttyACM0', baudrate=115200):
 
 
 if __name__ == '__main__':
-    main('/dev/ttyACM1')
+    main()
