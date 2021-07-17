@@ -4,7 +4,7 @@ setup(
     name='device-b',
     version='0.2',
     packages=['device_b'],
-    url='',
+    url='https://github.com/jbarria-uach/ELEL329-SistemasEmbebidos',
     license='MIT',
     author='Jorge Barría',
     author_email='jebarria@alumnos.uach.cl',
