@@ -14,6 +14,9 @@ Para la realización de este trabajo se utilizó el siguiente circuito:
 
 ## Software.
 
-El sistema requiere de 3 aplicaciones de software para trabajar:
+El sistema requiere de 3 aplicaciones de software para trabajar (todas se alojan en eeste repositorio):
 
-*WIP...*
+
+* [Software Dispositivo A](https://github.com/jbarria-uach/ELEL329-SistemasEmbebidos/tree/main/DeviceA). escrito en C/C++ usando Arduino IDE.
+* [Software Dispositivo B](https://github.com/jbarria-uach/ELEL329-SistemasEmbebidos/tree/main/DeviceB). escrito en Python
+* [Software Arduino Nano](https://github.com/jbarria-uach/ELEL329-SistemasEmbebidos/tree/main/ActiveLowORGate). escrito en C/C++ usando Arduino IDE.
