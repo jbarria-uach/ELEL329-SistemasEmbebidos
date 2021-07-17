@@ -1,0 +1,33 @@
+@startuml Device A Sequences
+participant ISR
+participant "setup()" as setup
+participant "loop()" as loop
+participant "Intermitencia\nL1" as blinkL1
+participant "Raspberry Pi" as RPi
+note over blinkL1: Mientras está activo\n"Parpadea" c/1 seg
+setup -> blinkL1: Ciclo de trabajo 25%
+activate blinkL1
+ISR -> loop: Pa pulsado
+loop -> blinkL1: Ciclo de trabajo 50%
+ISR -> loop: Pa pulsado
+loop -> blinkL1: Ciclo de trabajo 75%
+ISR -> loop: Pb pulsado
+loop -> RPi: Envía mensaje para imprimir en pantalla
+note over RPi: Imprime mensaje\nen pantalla
+ISR -> loop: Pc pulsado
+loop -> RPi: Envía mensaje para iniciar transmisión\nde estados L2,L3,L4
+RPi -> RPi: Inicia transmisión\nde estados L2,L3,L4
+note over RPi: Envía mensajes cada 250ms
+activate RPi
+ISR -> loop: Pb pulsado
+loop -> RPi: Envía mensaje para detener transmisión\nde estados L2,L3,L4
+deactivate RPi
+loop -> RPi: Envía mensaje para imprimir en pantalla
+note over RPi: Imprime mensaje\nen pantalla
+ISR -> loop: Pa pulsado
+loop -> blinkL1: Ciclo de trabajo 100%
+ISR -> loop: Pd pulsado
+loop -> loop: Apagar L1,L2,L3,L4
+deactivate blinkL1
+note over loop: \n\nModo dormido\n\n
+@enduml
